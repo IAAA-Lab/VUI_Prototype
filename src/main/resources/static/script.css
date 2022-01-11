@@ -1,0 +1,12 @@
+#datetext {
+    transition: font-size 5s, color 5s;
+    color: black;
+}
+#earth_div{
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    position: relative !important;
+}

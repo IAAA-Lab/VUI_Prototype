@@ -1,0 +1,143 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  static = false;
+  ignore_case=true;
+}
+
+PARSER_BEGIN(GramaticaTFG)
+package parseo;
+import java.io.Reader;
+import java.io.StringReader;
+
+public class GramaticaTFG
+{
+  static String result=null;
+  public static AnswerGenerator gis= new AnswerGenerator();
+  public static String parse(String recon, GramaticaTFG parser) throws ParseException
+  {
+    gis.setRecon(recon);
+    Reader r=new StringReader(recon);
+    parser.ReInit(r);
+    try
+    {
+      parser.instruction();
+      return result;
+    }
+    catch (Exception e)
+    {
+      System.out.println("NOK.");
+      System.out.println(e.getMessage());
+    }
+    catch (Error e)
+    {
+      System.out.println("Oops.");
+      System.out.println(e.getMessage());    
+    }
+    return null;
+  }
+}
+
+PARSER_END(GramaticaTFG)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN: {
+  < mapInit: "mapa">
+| < nexo: "hacia"|"hacia la"|"hacia el"|"al"|"a la" >
+| < vDirUp: "subir"|"sube"|"subeme" >
+| < vDirDown: "bajar"|"baja"|"bajame" >
+| < vMov: "mover"|"mueve"|"mueveme"|"muevete" >
+| < vDesp: "desplazar"|"desplaza"|"desplazame"|"desplazate">
+| < vIr: "ir"|"ve"|"vete" >
+| < vZoomOut: "quita zoom"|"zoom out"|"alejar"|"aleja"|"reducir"|"reduce"|"quita zoom"|"reduce zoom"|"alejame"|"alejate">
+| < vZoom: "haz zoom"|"zoom in"|"zoom"|"acercar"|"acerca"|"ampliar"|"amplia"|"acercame"|"acercate">
+| < vSat: "ver"|"mostrar"|"cambiar a">
+| < vBusca:"busca"|"llevame a"|"ir a"|"muevete a"|"mueveme a"|"ve a" >
+ }
+TOKEN: {
+  < dUp:"arriba"|"norte" >
+| < dDown: "abajo"|"sur" >
+| < dLeft: "izquierda"|"oeste" >
+| < dRight: "derecha"|"este" >
+| < dSE: "sureste" >
+| < dSO: "suroeste" >
+| < dNE: "noreste" >
+| < dNO: "noroeste" >
+ }
+TOKEN :
+{
+  < cuantif: "mas"|"menos"|"un poco" >
+| < Sat: "satelite" >
+| < zTerm: "imagen" >
+| < topo : (["a"-"z"])+ > //Da problemas por matchLength, especialmente con morfemas.
+}
+
+void instruction(): { }
+{
+  < mapInit > (verb()|search()|zoom()|sat()) < EOF >
+}
+void verb(): { }
+{
+  (mov()|ir()|desp())? (< cuantif >)? (< nexo >)? donde()
+  | dir() (< cuantif >)?
+}
+void dir(): { }
+{
+  < vDirUp > { result="mover arriba"; }
+| < vDirDown > { result="mover abajo";}
+}
+void mov(): { }
+{
+ < vMov >
+}
+void desp(): { }
+{
+  < vDesp >
+}
+void ir(): { }
+{
+  < vIr >
+}
+void donde():{}
+{
+  < dUp >{ result= "mover arriba"; }
+ |< dDown >{ result= "mover abajo"; }
+ |< dLeft >{ result= "mover izquierda"; }
+ |< dRight >{ result= "mover derecha"; }
+ |< dSE >{ result= "mover abajo derecha"; }
+ |< dSO >{ result= "mover abajo izquierda"; }
+ |< dNE >{ result= "mover arriba derecha"; }
+ |< dNO >{ result= "mover arriba izquierda"; }
+}
+void search():{}
+{
+  < vBusca > toponim()
+}
+void sat():{}
+{
+  (< vSat >)? < Sat > { result="satelite"; }
+}
+void toponim():{
+  Token t1 =null;}
+{
+	t1=< topo >
+	{result="Busca "+t1.image;}
+}
+void zoom():{}
+{
+  < vZoom > (zterm())?(< cuantif >)? { result="zoom in"; }
+| < vZoomOut > (zterm())?(< cuantif >)? { result="zoom out"; }
+}
+void zterm():{}
+{
+  < mapInit >|< zTerm >
+}
